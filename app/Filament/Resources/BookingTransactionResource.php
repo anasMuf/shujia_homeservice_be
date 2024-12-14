@@ -38,6 +38,8 @@ class BookingTransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Transaction';
+
     public static function updateTotals(Get $get, Set $set): void
     {
         $selectedHomeServices = collect($get('transactionDetails'))->filter(fn($item) => !empty($item['home_service_id']));
