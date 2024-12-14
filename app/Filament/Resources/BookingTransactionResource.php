@@ -13,22 +13,24 @@ use Filament\Support\RawJs;
 use Filament\Resources\Resource;
 use App\Models\BookingTransaction;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TimePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Wizard\Step;
+use Filament\Forms\Components\ToggleButtons;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\BookingTransactionResource\Pages;
 use App\Filament\Resources\BookingTransactionResource\RelationManagers;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TimePicker;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 
 class BookingTransactionResource extends Resource
 {
@@ -201,7 +203,7 @@ class BookingTransactionResource extends Resource
             ->columns([
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('booking_trx_id')->searchable(),
-                TextColumn::make('create_at'),
+                TextColumn::make('created_at'),
                 IconColumn::make('is_paid')
                 ->boolean()
                 ->trueColor('success')
@@ -216,6 +218,22 @@ class BookingTransactionResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+
+                Action::make('approve')
+                ->label('Approve')
+                ->action(function(BookingTransaction $record){
+                    $record->is_paid = true;
+                    $record->save();
+
+                    Notification::make()
+                    ->title('Order Approved')
+                    ->success()
+                    ->body('The order has been successfully approved.')
+                    ->send();
+                })
+                ->color('success')
+                ->requiresConfirmation()
+                ->visible(fn(BookingTransaction $record) => !$record->is_paid),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
