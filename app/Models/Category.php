@@ -26,4 +26,8 @@ class Category extends Model
     public function homeServices() {
         return $this->hasMany(HomeService::class);
     }
+    public function popularServices() {
+        return $this->hasMany(HomeService::class)
+                    ->where('is_popular',true);
+    }
 }
